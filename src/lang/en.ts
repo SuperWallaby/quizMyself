@@ -1,0 +1,28 @@
+export const en = {
+    self_quiz: "self quiz",
+    make_quiz: "make quiz",
+    manage: "manage",
+    exame: "exame",
+    right_answer: "right answer",
+    answer: "answer",
+    question: "question",
+    add: "add",
+    create_some_quiz: "Create quizzes",
+    Added_to_quiz_list: "Added to quiz list",
+    Can_not_added_to_quiz_list: "Can not added to quiz list",
+    Hope_this_app_help_your_learning: "Hope this app help your learning",
+    will_remember_quiz: "We will remember your quizzes",
+    check_right_answer: "Check right answer.",
+    index: "index",
+    quiz: "quiz",
+    lets_solve_quiz: "Lets solve quizzes",
+    submit: "submit",
+    it_is_right_answer: "It is right answer",
+    it_is_wrong_answer: "It is wrong answer",
+    do_manage_quiz: "Manage quizzes",
+    delete: "Delete",
+    answer_is_sample: "Answer is 'sample'",
+    sample: "sample",
+    It_is_perfect: "It is perfect"
+}
+
