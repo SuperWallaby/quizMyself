@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, Fragment } from "react";
 import {
   TextField,
   useTheme,
@@ -8,276 +8,256 @@ import {
   Card,
   CardContent,
   Snackbar,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody
+  IconButton,
+  CardActions,
+  Popover,
+  Typography,
+  Tooltip,
+  createStyles,
+  Theme
 } from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import { QExame } from "../../types/declations";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
-
-import { veritcalWrapStyle } from "../CreateQuestion";
-import { DB, shuffle } from "../../helps";
-import TempAlert from "@material-ui/lab/Alert";
-import Paper from "@material-ui/core/Paper";
 import "./Exame.scss";
 import { LANG } from "../../App";
+import ExameEndView from "./components/ExameEndView";
+import LinearBuffer from "../../components/progress/Progress";
+import LiveHelpIcon from "@material-ui/icons/LiveHelp";
+import {
+  DefaultQuest,
+  checkValue,
+  loadData,
+  getHandlers,
+  Exame as classExame
+} from "./helper";
+import { useModal, useToast } from "../../hooks/hook";
+import SurrenderModal, {
+  TSurrenderModalInfo
+} from "../createQuestion/components/SurrenderModal";
+import { formStyles, useStyles } from "./Styles";
+import { TExameContext } from "./declation";
+import { veritcalWrapStyle, ExpendButtonStyle } from "../createQuestion/style";
+import OptionsSelecter from "./components/OptionsSelecter";
+import Hint from "./components/Hint";
+import DetailAct from "./components/DetailAct";
+import Toast from "../../atom/Toast";
 
-function Alert(props: any) {
-  return <TempAlert elevation={6} {...props} />;
-}
-
-const formStyles = makeStyles(theme => ({
-  root: {
-    "& .MuiTextField-root": {
-      margin: theme.spacing(1)
+export const exameStyle = makeStyles(theme => ({
+  exame: {
+    "& .typography": {
+      padding: theme.spacing(1)
     }
   }
 }));
-
-const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1
-  },
-  space1: {
-    marginBottom: theme.spacing(3)
-  }
-}));
-
 interface IProps {}
 
 const Exame: React.FC<IProps> = () => {
-  const DefaultQExame: QExame = {
-    question: LANG["answer_is_sample"],
-    answer: LANG["sample"],
-    date: new Date(),
-    solved: false,
-    id: -1
-  };
-
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<QExame[]>([DefaultQExame]);
-  const [toastOpen, setToastOpen] = useState({
-    sucess: false,
-    fail: false
-  });
+  const [data, setData] = useState<QExame[]>([new classExame(DefaultQuest)]);
+  const { toastHandle, toastOps } = useToast();
+  const surrenderModalHook = useModal<TSurrenderModalInfo>();
+  const [detailMode, setDetailMode] = useState(false);
+  const [hint, setHint] = useState("");
+  const [activeStep, setActiveStep] = React.useState(0);
   const [isFinish, setIsFinish] = useState(false);
-  const wrapClasses = veritcalWrapStyle();
   const [expect, setExpect] = useState("");
+  const exameStlyes = exameStyle();
+  const wrapClasses = veritcalWrapStyle();
   const classes = useStyles();
   const formClass = formStyles();
   const theme = useTheme();
-  const [activeStep, setActiveStep] = React.useState(0);
-
-  const handleClose = (event: any, reason: any) => {
-    if (reason === "clickaway") {
-      return;
-    }
-
-    setToastOpen({
-      fail: false,
-      sucess: false
-    });
-  };
-
-  let tempData: any[] = [];
-
-  if (loading) {
-    (async () => {
-      let cursor = await DB?.transaction("question").store.openCursor();
-      while (cursor) {
-        tempData.push(cursor.value);
-        cursor = await cursor.continue();
-      }
-    })().finally(() => {
-      setData(tempData.length ? shuffle(tempData) : [DefaultQExame]);
-      setLoading(false);
-    });
-  }
-
-  const checkValue = () => {
-    if (!data[activeStep]) {
-      throw new Error(
-        `data 안에 ${activeStep} 번쨰 데이터는 존재하지 않습니다.`
-      );
-    }
-
-    const rightAnswer = data[activeStep].answer;
-    const filteredExpect = expect.toLowerCase().trim();
-    return (
-      filteredExpect === rightAnswer ||
-      filteredExpect === rightAnswer.toLowerCase()
-    );
-  };
-
-  const handleSubmit = (e: any) => {
-    if (checkValue()) {
-      data[activeStep].solved = true;
-      setData([...data]);
-      if (isLastStep) {
-        setIsFinish(true);
-      } else {
-        setActiveStep(activeStep + 1);
-      }
-      setToastOpen({ fail: false, sucess: true });
-    } else {
-      setToastOpen({ fail: true, sucess: false });
-    }
-  };
 
   const dataLength = data.length;
   const isLastStep = activeStep === dataLength - 1;
+  const currentQuiz = data[activeStep];
 
-  const handleNext = () => {
-    if (isLastStep) {
-      setIsFinish(true);
-    } else {
-      setActiveStep(prevActiveStep => prevActiveStep + 1);
-    }
+  const DataCounts = useMemo(() => {
+    let countLost: number = 0;
+    let countCorrect: number = 0;
+    let countSkipd: number = 0;
+    data.forEach(d => {
+      if (d.testResult) countLost++;
+    });
+    countSkipd = activeStep - countCorrect - countLost;
+    return {
+      countSkipd,
+      countCorrect,
+      countLost
+    };
+  }, [data, activeStep]);
+
+  const exameContext: TExameContext = {
+    data,
+    setData,
+    surrenderModalHook,
+    setHint,
+    isLastStep,
+    expect,
+    isFinish,
+    activeStep,
+    currentQuiz,
+    hint,
+    detailMode,
+    setDetailMode,
+    setActiveStep,
+    setIsFinish,
+    setExpect,
+    toastHandle,
+    toastOps
   };
 
-  const handleBack = () => {
-    setActiveStep(prevActiveStep => prevActiveStep - 1);
-  };
+  const {
+    handleBack,
+    handleCloseSnack,
+    handleNext,
+    handleSubmit,
+    handleClickNextBtn,
+    handleOpenSurrenderModal
+  } = getHandlers(exameContext);
 
-  if (isFinish) {
-    const solvedCount = data.filter(d => d.solved).length;
-    const ratioSolved = solvedCount / dataLength;
-    const ratioSolvedString = `${solvedCount} / ${dataLength} `;
-    let emoji = "😭";
-    if (ratioSolved > 0.33) emoji = "😢";
-    if (ratioSolved > 0.66) emoji = "🙂";
-    if (ratioSolved > 0.99) emoji = "😆";
+  if (loading) {
+    loadData(setLoading, setData);
+  }
 
-    let titleMessage = LANG["check_right_answer"];
-
-    if (ratioSolved === 1) titleMessage = LANG["It_is_perfect"];
-
+  if (loading)
     return (
-      <div className={wrapClasses.root}>
-        <h1>{titleMessage}</h1>
-        <TableContainer component={Paper}>
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>{LANG["index"]}</TableCell>
-                <TableCell align="center">{LANG["quiz"]}</TableCell>
-                <TableCell align="right">{LANG["right_answer"]}</TableCell>
-                <TableCell align="right">
-                  {ratioSolvedString + emoji}{" "}
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.map((d, i) => (
-                <TableRow key={d.id}>
-                  <TableCell component="th" scope="row">
-                    {i + 1}
-                  </TableCell>
-                  <TableCell
-                    style={{
-                      maxWidth: 130
-                    }}
-                    align="center"
-                  >
-                    {d.question}
-                  </TableCell>
-                  <TableCell align="right">{d.answer}</TableCell>
-                  <TableCell align="right">{d.solved ? "⭕" : "❌"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+      <div>
+        <LinearBuffer />
       </div>
     );
+
+  const {
+    img,
+    id: currentId,
+    date,
+    priority,
+    question,
+    answer,
+    customHint,
+    smallQuestion,
+    lastSolve,
+    explain,
+    type,
+    options
+  } = currentQuiz.data;
+
+  let imgURL = "";
+  if (img) {
+    imgURL = URL.createObjectURL(img);
+    // URL.revokeObjectURL(imgURL);
   }
 
   let stepper = "dots";
+
   if (dataLength > 10) stepper = "text";
   if (dataLength > 100) stepper = "progress";
+  if (isFinish) return <ExameEndView data={data} />;
 
+  const { countCorrect, countSkipd, countLost } = DataCounts;
   return (
     <div className={wrapClasses.root}>
-      <h1>{LANG["lets_solve_quiz"]}</h1>
-      <Card className={classes.space1}>
-        <MobileStepper
-          variant={stepper as any}
-          steps={dataLength}
-          position="static"
-          activeStep={activeStep}
-          className={classes.root}
-          nextButton={
-            <Button size="small" onClick={handleNext}>
-              {isLastStep ? "Finish" : "Skip"}
-              {theme.direction === "rtl" ? (
-                <KeyboardArrowLeft />
-              ) : (
-                <KeyboardArrowRight />
+      <div className={exameStlyes.exame}>
+        <h3>
+          {activeStep
+            ? `😊 ${countCorrect} 😓 ${countLost} ❔ ${countSkipd}`
+            : LANG["fisrt_quiz"]}
+        </h3>
+        <Card className={classes.space3}>
+          <MobileStepper
+            variant={stepper as any}
+            steps={dataLength}
+            position="static"
+            activeStep={activeStep}
+            className={classes.root}
+            nextButton={
+              <Button size="small" onClick={handleNext}>
+                {isLastStep ? "Finish" : "Skip"}
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowLeft />
+                ) : (
+                  <KeyboardArrowRight />
+                )}
+              </Button>
+            }
+            backButton={
+              <Button
+                size="small"
+                onClick={handleBack}
+                disabled={activeStep === 0}
+              >
+                {theme.direction === "rtl" ? (
+                  <KeyboardArrowRight />
+                ) : (
+                  <KeyboardArrowLeft />
+                )}
+                Back
+              </Button>
+            }
+          />
+          <CardContent>
+            <div>
+              <h2>{question}</h2>
+              {imgURL && <img src={imgURL} />}
+              <Hint hint={hint} />
+              <form className={formClass.root}>
+                <Fragment>
+                  {type === "essayQ" && (
+                    <TextField
+                      onChange={e => {
+                        setExpect(e.currentTarget.value);
+                      }}
+                      value={expect}
+                      id="outlined-basic"
+                      label={LANG["answer"]}
+                      variant="outlined"
+                    />
+                  )}
+                </Fragment>
+              </form>
+              {type === "multipleQ" && (
+                <OptionsSelecter
+                  setExpect={setExpect}
+                  expect={expect}
+                  options={options || []}
+                />
               )}
-            </Button>
-          }
-          backButton={
-            <Button
-              size="small"
-              onClick={handleBack}
-              disabled={activeStep === 0}
-            >
-              {theme.direction === "rtl" ? (
-                <KeyboardArrowRight />
-              ) : (
-                <KeyboardArrowLeft />
-              )}
-              Back
-            </Button>
-          }
-        />
-        <CardContent>
+            </div>
+          </CardContent>
+          {detailMode && (
+            <DetailAct
+              handleOpenSurrenderModal={handleOpenSurrenderModal}
+              exameContext={exameContext}
+            />
+          )}
           <div>
-            <h1>{data[activeStep].question}</h1>
-            <form className={formClass.root}>
-              <TextField
-                onChange={e => {
-                  setExpect(e.currentTarget.value);
-                }}
-                value={expect}
-                id="outlined-basic"
-                label={LANG["answer"]}
-                variant="outlined"
-              />
-            </form>
+            <Button
+              style={ExpendButtonStyle}
+              size="large"
+              onClick={() => {
+                setDetailMode(!detailMode);
+              }}
+            >
+              {detailMode ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
-      <Button
-        onClick={handleSubmit}
-        size="large"
-        variant="contained"
-        color="primary"
-      >
-        {LANG["submit"]}
-      </Button>
-      <Snackbar
-        open={toastOpen.sucess}
-        autoHideDuration={2000}
-        onClose={handleClose}
-      >
-        <Alert onClose={handleClose} severity="success">
-          {LANG["it_is_right_answer"]} 😊
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        open={toastOpen.fail}
-        autoHideDuration={3000}
-        onClose={handleClose}
-      >
-        <Alert onClose={handleClose} severity="error">
-          {LANG["it_is_wrong_answer"]} 🤔
-        </Alert>
-      </Snackbar>
+        </Card>
+        <Button
+          onClick={handleSubmit}
+          size="large"
+          variant="contained"
+          color="primary"
+        >
+          {LANG["submit"]}
+        </Button>
+        <SurrenderModal
+          handleClickNextBtn={handleClickNextBtn}
+          modalHook={surrenderModalHook}
+        />
+        <Toast open={false} {...toastOps} />
+      </div>
     </div>
   );
 };

@@ -1,0 +1,1 @@
+export type Tlangs = "ko" | "en" | "ar"

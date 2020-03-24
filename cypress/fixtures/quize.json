@@ -1,0 +1,40 @@
+[
+  {
+    "dev": "basic",
+    "title": "what is your name",
+    "answer": "minjae"
+  },
+  {
+    "dev": "basic",
+    "title": "what is your ",
+    "answer": "minjae"
+  },
+  {
+    "dev": "full-test",
+    "title": "what is your last name",
+    "answer": "Kim",
+    "img": "quize1-img",
+    "customHint": "Your enicial is K",
+    "describe": "2+2 is naturally 4"
+  },
+  {
+    "dev": "full-test",
+    "title": "what is your last name2",
+    "answer": "Kim",
+    "img": "quize1-img",
+    "customHint": "Your enicial is K",
+    "describe": "2+2 is naturally 4"
+  },
+  {
+    "dev": "select-type",
+    "title": "what is 1 + 1",
+    "answer": "2",
+    "options": ["1", "2", "3", "4"]
+  },
+  {
+    "dev": "select-type",
+    "title": "what is 1 + 1 (2)",
+    "answer": "2",
+    "options": ["1", "2", "3", "4"]
+  }
+]

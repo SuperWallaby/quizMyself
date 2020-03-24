@@ -97,51 +97,6 @@ const EnhancedTableHead: React.FC<IHeadProps> = (props: any) => {
   );
 };
 
-// const EnhancedTableToolbar: React.FC<any> = props => {
-//   const classes = useToolbarStyles();
-//   const { numSelected } = props;
-
-//   return (
-//     <Toolbar
-//       className={clsx(classes.root, {
-//         [classes.highlight]: numSelected > 0
-//       })}
-//     >
-//       {numSelected > 0 ? (
-//         <Typography
-//           className={classes.title}
-//           color="inherit"
-//           variant="subtitle1"
-//         >
-//           {numSelected} selected
-//         </Typography>
-//       ) : (
-//         <Typography className={classes.title} variant="h6" id="tableTitle">
-//           Nutrition
-//         </Typography>
-//       )}
-
-//       {numSelected > 0 ? (
-//         <Tooltip title="Delete">
-//           <IconButton aria-label="delete">
-//             <DeleteIcon />
-//           </IconButton>
-//         </Tooltip>
-//       ) : (
-//         <Tooltip title="Filter list">
-//           <IconButton aria-label="filter list">
-//             <FilterListIcon />
-//           </IconButton>
-//         </Tooltip>
-//       )}
-//     </Toolbar>
-//   );
-// };
-
-// EnhancedTableToolbar.propTypes = {
-//   numSelected: PropTypes.number.isRequired
-// };
-
 const useStyles = makeStyles(theme => ({
   root: {
     width: "100%"
@@ -283,10 +238,17 @@ export const EnhancedTable: React.FC<IProps> = ({
                           />
                         </TableCell>
                       )}
-                      <TableCell component="th" id={labelId} scope="row">
+                      <TableCell
+                        cy-data="listQuiz"
+                        component="th"
+                        id={labelId}
+                        scope="row"
+                      >
                         {row.question}
                       </TableCell>
-                      <TableCell align="right">{row.answer}</TableCell>
+                      <TableCell cy-data="listAnswer" align="right">
+                        {row.answer}
+                      </TableCell>
                     </TableRow>
                   );
                 })}

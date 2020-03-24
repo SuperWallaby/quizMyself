@@ -3,7 +3,7 @@ import DynamicImport from "../utils/dynamicComponent";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 export const CreateQuestion = props => (
-  <DynamicImport load={() => import("./CreateQuestion")}>
+  <DynamicImport load={() => import("./createQuestion/CreateQuestion")}>
     {DNcompoent =>
       DNcompoent === null ? (
         <CircularProgress variant="determinate" />
@@ -16,6 +16,18 @@ export const CreateQuestion = props => (
 
 export const Exame = props => (
   <DynamicImport load={() => import("./exame/Exame")}>
+    {DNcompoent =>
+      DNcompoent === null ? (
+        <CircularProgress variant="determinate" />
+      ) : (
+        <DNcompoent {...props} />
+      )
+    }
+  </DynamicImport>
+);
+
+export const SettingPage = props => (
+  <DynamicImport load={() => import("./setting/Setting")}>
     {DNcompoent =>
       DNcompoent === null ? (
         <CircularProgress variant="determinate" />

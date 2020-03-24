@@ -24,6 +24,14 @@ export const ar = {
     delete: "حذف",
     answer_is_sample: "الجواب هو' عينة '",
     sample: "عينة",
-    It_is_perfect: "انه مثالي"
+    It_is_perfect: "انه مثالي",
+    lang_choice: "اختيار اللغة",
+    lang_setting: "إعدادات اللغة",
+    setting: "الإعدادات",
+    snow: "الثلج",
+    hint: "تلميحات",
+    show_detail: "عرض التفاصيل",
+    add_img: "إضافة صورة",
+    retry: "إعادة المحاولة"
 }
 

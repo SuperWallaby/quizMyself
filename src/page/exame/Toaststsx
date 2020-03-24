@@ -1,0 +1,25 @@
+import React, { Fragment } from "react";
+import { Snackbar } from "@material-ui/core";
+
+interface IProps {
+  toastOpen;
+}
+
+const Toast: React.FC<IProps> = ({ toastOpen }) => {
+  return (
+    <Fragment>
+      <Snackbar
+        open={toastOpen.sucess}
+        autoHideDuration={2000}
+        onClose={handleCloseSnack}
+      >
+        <Alert onClose={handleCloseSnack} severity="success">
+          {LANG["it_is_right_answer"]} 😊
+        </Alert>
+      </Snackbar>
+      >
+    </Fragment>
+  );
+};
+
+export default Toast;

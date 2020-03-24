@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { veritcalWrapStyle } from "./CreateQuestion";
 import QuestionList from "../components/QuestionList";
 import { MyDB } from "../types/declations";
 import { DB } from "../helps";
 import { Button } from "@material-ui/core";
 import { wrap, unwrap } from "idb";
 import { LANG } from "../App";
+import { veritcalWrapStyle } from "./createQuestion/style";
 
 interface IProps {}
 
@@ -53,7 +53,7 @@ const ManageQuestion: React.FC<IProps> = () => {
 
   return (
     <div className={wrapCalsses.root}>
-      <h1>{LANG["do_manage_quiz"]}</h1>
+      <h2>{LANG["do_manage_quiz"]}</h2>
 
       <div>
         <QuestionList

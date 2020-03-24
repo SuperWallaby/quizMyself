@@ -1,0 +1,54 @@
+import React, { Fragment } from "react";
+import MuiAlert from "@material-ui/lab/Alert";
+import { Snackbar } from "@material-ui/core";
+import { LANG } from "../../App";
+
+interface IProps {
+  toastOpen: any;
+  handleClose: any;
+}
+
+const CreateQuizToasts: React.FC<IProps> = ({ toastOpen, handleClose }) => {
+  return (
+    <Fragment>
+      <Snackbar
+        open={toastOpen.sucess}
+        autoHideDuration={2000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="success">
+          {LANG["Added_to_quiz_list"]}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={toastOpen.fail}
+        autoHideDuration={3000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="error">
+          {LANG["Can_not_added_to_quiz_list"]}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={toastOpen.guid}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="info">
+          💌 {LANG["Hope_this_app_help_your_learning"]}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={toastOpen.remember}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="info">
+          {LANG["will_remember_quiz"]} 😊
+        </Alert>
+      </Snackbar>
+    </Fragment>
+  );
+};
+
+export default CreateQuizToasts;
