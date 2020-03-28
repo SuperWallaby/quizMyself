@@ -13,7 +13,7 @@
     "dev": "full-test",
     "title": "what is your last name",
     "answer": "Kim",
-    "img": "quize1-img",
+    "img": ["wallaby.jpg", "wallaby.jpg"],
     "customHint": "Your enicial is K",
     "describe": "2+2 is naturally 4"
   },
@@ -21,7 +21,7 @@
     "dev": "full-test",
     "title": "what is your last name2",
     "answer": "Kim",
-    "img": "quize1-img",
+    "img": ["wallaby.jpg", "wallaby.jpg"],
     "customHint": "Your enicial is K",
     "describe": "2+2 is naturally 4"
   },

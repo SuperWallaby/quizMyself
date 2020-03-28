@@ -144,10 +144,11 @@ const Exame: React.FC<IProps> = () => {
     options
   } = currentQuiz.data;
 
-  let imgURL = "";
+  let imgURL: string[] = [];
   if (img) {
-    imgURL = URL.createObjectURL(img);
-    // URL.revokeObjectURL(imgURL);
+    img.forEach(image => {
+      imgURL.push(URL.createObjectURL(image));
+    });
   }
 
   let stepper = "dots";
@@ -160,11 +161,11 @@ const Exame: React.FC<IProps> = () => {
   return (
     <div className={wrapClasses.root}>
       <div className={exameStlyes.exame}>
-        <h3>
+        <h2>
           {activeStep
             ? `😊 ${countCorrect} 😓 ${countLost} ❔ ${countSkipd}`
             : LANG["fisrt_quiz"]}
-        </h3>
+        </h2>
         <Card className={classes.space3}>
           <MobileStepper
             variant={stepper as any}
@@ -200,7 +201,9 @@ const Exame: React.FC<IProps> = () => {
           <CardContent>
             <div>
               <h2>{question}</h2>
-              {imgURL && <img src={imgURL} />}
+              {imgURL.map((url, i) => (
+                <img key={i + "img"} src={url} />
+              ))}
               <Hint hint={hint} />
               <form className={formClass.root}>
                 <Fragment>

@@ -2,13 +2,12 @@
 type TQuiz = {
   title: string, options?: string[], answer: string, customHint: string,
   describe: string,
-  img: string
+  img: string[]
 }
 
 
 
 describe("Test Create", function () {
-
   beforeEach(function () {
     cy.fixture('quize.json').as('quizes')
       .then(quizes => quizes.filter((quiz: any) => quiz.dev === "basic")).as('basicQuizes');
@@ -28,10 +27,15 @@ describe("Test Create", function () {
       .get("multipleI").as("MultipleI")
   })
 
+  const checkIndexDb = () =>
+    new Cypress.Promise((resolve, reject) => {
+      indexedDB
+    })
   const submitQuiz = () => cy.get("addB").click();
   const checkResult = (i: number) => cy.get("snackBar").invoke("text").should("include", i === 0 ? "remember" : "Added");
   const typeBasic = ({ answer, title }: TQuiz) => cy.get("@EssayTab").click().get("@AnswerI").type(answer).get("@EssayI").type(title);
   const checkEmpty = () => cy.get("@AnswerI").should("have.value", "").get("@EssayI").should("have.value", "")
+
 
   // Can Create Quiz
   it("Can Create Bassic-Quiz", function () {
@@ -86,18 +90,30 @@ describe("Test Create", function () {
   it.only("Can Create Full Option", function () {
     cy.wrap(this.fullOptionalQuizes).each((quiz: TQuiz, i) => {
       typeBasic(quiz).then(() => {
-        // @ts-ignore
-        cy.get("fileUploader").attachFile()
-        submitQuiz()
-        checkResult(i)
-      })
-    })
+        cy.get("pendB").should('have.attr', 'data-open');
+        cy.get("pendB").then(($pendB) => {
+          const isOpen = $pendB.attr("data-open");
 
+          if (isOpen === "false") {
+            return $pendB.click();
+          }
+          return $pendB
+        });
+
+        cy.wrap(quiz.img).each((img: string) => {
+          cy.upload("fileUploader", img);
+        })
+        cy.get("describe").type(quiz.describe);
+        cy.get("customHint").type(quiz.customHint).then(() => {
+          submitQuiz()
+          checkResult(i)
+        })
+      });
+    })
   })
 })
 
-  // export default "";
+// export default "";
 
 
-  //  다음 테스트들을 하나로 만든다.
-
+//  다음 테스트들을 하나로 만든다.

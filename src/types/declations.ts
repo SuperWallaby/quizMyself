@@ -21,7 +21,7 @@ export interface Question extends IDBCommon {
     answer: any;
     type: TquizType
     date: Date;
-    img?: Blob;
+    img?: Blob[];
     priority: number;
     smallQuestion?: string;
     explain?: string

@@ -29,6 +29,8 @@ import Card from "@material-ui/core/Card/Card";
 import TextField from "@material-ui/core/TextField/TextField";
 import CardContent from "@material-ui/core/CardContent/CardContent";
 import Button from "@material-ui/core/Button/Button";
+import Grid from "@material-ui/core/Grid";
+import PhotoCard from "./components/PhotoCard";
 
 interface IProps {}
 
@@ -44,8 +46,10 @@ const CreateQuestion: React.FC<IProps> = () => {
   const [options, setOptions] = useState<TtempOption[]>([defaultOp]);
   const { toastHandle, toastOps } = useToast();
 
-  console.log("options");
-  console.log(options);
+  const handleDeleteBtnClick = (i: number) => {
+    question.img?.splice(i, 1);
+    setQuestion({ ...question });
+  };
 
   const handleClickOptionDelete = (i: number) => {
     options.splice(i, 1);
@@ -172,6 +176,30 @@ const CreateQuestion: React.FC<IProps> = () => {
       });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.persist();
+    if (!e) return;
+    if (!imgValidate(e)) return;
+    const file: any = e.target!.files![0];
+    Resizer.imageFileResizer(
+      file,
+      400,
+      600,
+      "JPEG",
+      80,
+      0,
+      async (blob: Blob) => {
+        question.img = question.img ? [...question.img, blob] : [blob];
+        setFileName(removeSpecialChar(file.name));
+        setQuestion({
+          ...question,
+          img: question.img
+        });
+      },
+      "blob"
+    );
+  };
+
   return (
     <div className={wrapCalsses.root}>
       <h2>{LANG["create_some_quiz"]}</h2>
@@ -264,33 +292,9 @@ const CreateQuestion: React.FC<IProps> = () => {
             {detailMode && (
               <Fragment>
                 <div className="fileUploader">
-                  <div>{fileName && <h6>{fileName}</h6>}</div>
                   <input
                     data-cy="fileUploader"
-                    onChange={e => {
-                      e.persist();
-                      if (!e) return;
-                      if (!imgValidate(e)) return;
-
-                      const file: any = e.target!.files![0];
-
-                      Resizer.imageFileResizer(
-                        file,
-                        400,
-                        600,
-                        "JPEG",
-                        80,
-                        0,
-                        async (blob: Blob) => {
-                          setFileName(removeSpecialChar(file.name));
-                          setQuestion({
-                            ...question,
-                            img: blob
-                          });
-                        },
-                        "blob"
-                      );
-                    }}
+                    onChange={handleFileChange}
                     ref={imageInputRef}
                     style={{
                       position: "absolute",
@@ -303,6 +307,7 @@ const CreateQuestion: React.FC<IProps> = () => {
                   {/* 커스텀 힌트 */}
                   <TextField
                     id="outlined-basic"
+                    data-cy="customHint"
                     multiline
                     onChange={e => {
                       setQuestion({
@@ -316,6 +321,7 @@ const CreateQuestion: React.FC<IProps> = () => {
                   />
                   {/* 해설 */}
                   <TextField
+                    data-cy="describe"
                     id="outlined-basic"
                     multiline
                     onChange={e => {
@@ -342,12 +348,33 @@ const CreateQuestion: React.FC<IProps> = () => {
                     {LANG["add_img"]}
                   </Button>
                 </div>
+                <div>
+                  <Grid wrap="wrap" container spacing={1}>
+                    {question.img?.map((blobImg, i) => {
+                      const handleDeleteBtn = handleDeleteBtnClick.bind(
+                        handleDeleteBtnClick,
+                        i
+                      );
+                      const imgURL = URL.createObjectURL(blobImg);
+                      return (
+                        <Grid xs={3} key={i} item>
+                          <PhotoCard
+                            handleDelete={handleDeleteBtn}
+                            imgURL={imgURL}
+                          />
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </div>
               </Fragment>
             )}
           </CardContent>
           <div>
             <Button
               className="lastBtn"
+              data-cy="pendB"
+              data-open={detailMode ? "true" : "false"}
               style={ExpendButtonStyle}
               size="large"
               onClick={() => {
